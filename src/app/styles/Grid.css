@@ -1,0 +1,59 @@
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+.table >tbody>tr>td:hover, .table-hover>tbody>tr>td:hover{
+    background-color: #e6e6e6 !important;
+}
+
+.table {
+    font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+    font-size: 14px;
+    margin: 20px;
+    width: 150px;
+    display: inline-block;
+}
+
+.table td {
+    width: 50px;
+    height: 50px;
+    vertical-align: middle;
+    text-align: center;
+    cursor: pointer;
+    border-style: solid;
+    border-color: white;
+    background: #F8E391;
+}
+
+tr:first-child td:first-child {
+    border-top-left-radius: 10px;
+    border-top: none;
+}
+tr:first-child td:last-child {
+    border-top-right-radius: 10px;
+    border-top: none;
+}
+tr:first-child td:nth-child(2) {
+    border-top: none;
+}
+tr:last-child td:first-child {
+    border-radius: 0 0 0 10px;
+}
+tr:last-child td:last-child {
+    border-radius: 0 0 10px 0;
+}
+
+#app {
+    border: 2px dashed orange;
+    padding: 30px;
+    text-align: center;
+    width: 50%;
+    margin: 0 auto;
+}

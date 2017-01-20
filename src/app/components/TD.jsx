@@ -3,23 +3,22 @@ import React from 'react';
 export default class TD extends React.Component {
     constructor(props) {
         super(props);
+        this.onTdClick = this.onTdClick.bind(this);
     }
 
+    onTdClick() {
+        this.props.onTdClick(this.props.dataKey, this.props.item);
+    }
+    
     render() {
-        let data;
-        switch (+this.props.item) {
-            case -1:
-                data = 'X';
-                break;
-            case 0:
-                data = '';
-                break;
-            case 1:
-                data = 'O';
-                break;
-        }
+        let values = {
+            "1": "O",
+            "-1": "X",
+            "0": ""
+        };
+        
         return(
-            <td data-key={this.props.dataKey}>{data}</td>
+            <td onClick={this.onTdClick}>{values[this.props.item]}</td>
         );
     }
 }

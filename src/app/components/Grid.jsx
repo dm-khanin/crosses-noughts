@@ -7,13 +7,14 @@ export default class Grid extends React.Component {
     constructor(props) {
         super(props);
         this.onmousedown = this.onmousedown.bind(this);
+        this.onTdClick = this.onTdClick.bind(this);
     }
 
     componentDidMount() {
         axios.get('http://606ep.ru:8080')
             .then((response) => {
-                this.initialAlignment = response.data.toString().split(',').map((item) => +item );
-                this.props.dataLoaded(this.initialAlignment);
+                const initialAlignment = response.data.toString().split(',').map((item) => +item );
+                this.props.dataLoaded(initialAlignment);
             });
     }
 
@@ -21,18 +22,21 @@ export default class Grid extends React.Component {
         e.preventDefault();
     }
 
+    onTdClick(key, value) {
+        this.props.onTdClick(key, value);
+    }
+
     render() {
         if (this.props.isDataLoaded) {
-            let data = this.initialAlignment;
-
-            var tds1 = data.map((item, index) => {
-                return index < 3 && <TD key={index} dataKey={index} item={item} />
-            });
-            var tds2 = data.map((item, index) => {
-                return index > 2 && index < 6 && <TD key={index} dataKey={index} item={item} />
-            });
-            var tds3 = data.map((item, index) => {
-                return index > 5 && <TD key={index} dataKey={index} item={item} />
+            var TDs = this.props.arr.map((item, index) => {
+                return (
+                    <TD
+                        key={index}
+                        dataKey={index}
+                        onTdClick={this.onTdClick}
+                        item={item}
+                    />
+                    );
             });
         }
 
@@ -40,16 +44,16 @@ export default class Grid extends React.Component {
             <div>
                 {
                     this.props.isDataLoaded &&
-                        <table class="table" onClick={this.props.click} onMouseDown={this.onmousedown} >
+                        <table class="table" onMouseDown={this.onmousedown} >
                             <tbody>
                                 <tr>
-                                    {tds1}
+                                    {TDs[0]}{TDs[1]}{TDs[2]}
                                 </tr>
                                 <tr>
-                                    {tds2}
+                                    {TDs[3]}{TDs[4]}{TDs[5]}
                                 </tr>
                                 <tr>
-                                    {tds3}
+                                    {TDs[6]}{TDs[7]}{TDs[8]}
                                 </tr>
                             </tbody>
                         </table>

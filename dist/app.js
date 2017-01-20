@@ -21533,15 +21533,16 @@
 	        _this.state = {
 	            activePlayer: null,
 	            isDataLoaded: false,
-	            whoWins: null
+	            whoWins: null,
+	            arr: [],
+	            initialArr: []
 	        };
 
 	        _this.onSetCrossesIsActive = _this.onSetCrossesIsActive.bind(_this);
 	        _this.onSetNoughtsIsActive = _this.onSetNoughtsIsActive.bind(_this);
-	        _this.onTableClick = _this.onTableClick.bind(_this);
 	        _this.dataLoaded = _this.dataLoaded.bind(_this);
-	        _this.array = [];
 	        _this.isWin = _this.isWin.bind(_this);
+	        _this.onTdClick = _this.onTdClick.bind(_this);
 	        return _this;
 	    }
 
@@ -21560,45 +21561,31 @@
 	            });
 	        }
 	    }, {
-	        key: 'onTableClick',
-	        value: function onTableClick(e) {
-	            if (this.state.activePlayer === null || e.target.textContent != '' || this.state.whoWins !== null) {
+	        key: 'onTdClick',
+	        value: function onTdClick(key, value) {
+	            if (this.state.activePlayer === null || value !== 0 || this.state.whoWins !== null) {
 	                return;
 	            }
 
-	            var nodeElement = e.target;
-	            var key = nodeElement.dataset.key;
+	            var prevArray = this.state.arr;
+	            this.state.activePlayer === "crosses" ? prevArray[key] = -1 : prevArray[key] = 1;
+	            this.setState({
+	                arr: prevArray
+	            });
 
-	            switch (this.state.activePlayer) {
-	                case "crosses":
-	                    {
-	                        nodeElement.textContent = 'X';
-	                        this.array[key] = -1;
-	                        if (this.isWin(this.array)) {
-	                            return;
-	                        }
-	                        this.onSetNoughtsIsActive();
-	                        break;
-	                    }
-
-	                case "noughts":
-	                    {
-	                        nodeElement.textContent = 'O';
-	                        this.array[key] = 1;
-	                        if (this.isWin(this.array)) {
-	                            return;
-	                        }
-	                        this.onSetCrossesIsActive();
-	                        break;
-	                    }
+	            if (this.isWin(this.state.arr)) {
+	                return;
 	            }
+
+	            prevArray[key] === -1 ? this.onSetNoughtsIsActive() : this.onSetCrossesIsActive();
 	        }
 	    }, {
 	        key: 'dataLoaded',
 	        value: function dataLoaded(data) {
-	            this.array = data;
 	            this.setState({
-	                isDataLoaded: true
+	                isDataLoaded: true,
+	                initialArr: data,
+	                arr: data.slice()
 	            });
 	        }
 	    }, {
@@ -21647,9 +21634,11 @@
 	                    win: this.state.whoWins
 	                }),
 	                _react2.default.createElement(_Grid2.default, {
-	                    click: this.onTableClick,
+	                    onTdClick: this.onTdClick,
 	                    dataLoaded: this.dataLoaded,
-	                    isDataLoaded: this.state.isDataLoaded
+	                    isDataLoaded: this.state.isDataLoaded,
+	                    initialArr: this.state.initialArr,
+	                    arr: this.state.arr
 	                })
 	            );
 	        }
@@ -21704,6 +21693,7 @@
 	        var _this = _possibleConstructorReturn(this, (Grid.__proto__ || Object.getPrototypeOf(Grid)).call(this, props));
 
 	        _this.onmousedown = _this.onmousedown.bind(_this);
+	        _this.onTdClick = _this.onTdClick.bind(_this);
 	        return _this;
 	    }
 
@@ -21713,10 +21703,10 @@
 	            var _this2 = this;
 
 	            _axios2.default.get('http://606ep.ru:8080').then(function (response) {
-	                _this2.initialAlignment = response.data.toString().split(',').map(function (item) {
+	                var initialAlignment = response.data.toString().split(',').map(function (item) {
 	                    return +item;
 	                });
-	                _this2.props.dataLoaded(_this2.initialAlignment);
+	                _this2.props.dataLoaded(initialAlignment);
 	            });
 	        }
 	    }, {
@@ -21725,19 +21715,23 @@
 	            e.preventDefault();
 	        }
 	    }, {
+	        key: 'onTdClick',
+	        value: function onTdClick(key, value) {
+	            this.props.onTdClick(key, value);
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
-	            if (this.props.isDataLoaded) {
-	                var data = this.initialAlignment;
+	            var _this3 = this;
 
-	                var tds1 = data.map(function (item, index) {
-	                    return index < 3 && _react2.default.createElement(_TD2.default, { key: index, dataKey: index, item: item });
-	                });
-	                var tds2 = data.map(function (item, index) {
-	                    return index > 2 && index < 6 && _react2.default.createElement(_TD2.default, { key: index, dataKey: index, item: item });
-	                });
-	                var tds3 = data.map(function (item, index) {
-	                    return index > 5 && _react2.default.createElement(_TD2.default, { key: index, dataKey: index, item: item });
+	            if (this.props.isDataLoaded) {
+	                var TDs = this.props.arr.map(function (item, index) {
+	                    return _react2.default.createElement(_TD2.default, {
+	                        key: index,
+	                        dataKey: index,
+	                        onTdClick: _this3.onTdClick,
+	                        item: item
+	                    });
 	                });
 	            }
 
@@ -21746,24 +21740,30 @@
 	                null,
 	                this.props.isDataLoaded && _react2.default.createElement(
 	                    'table',
-	                    { className: 'table', onClick: this.props.click, onMouseDown: this.onmousedown },
+	                    { className: 'table', onMouseDown: this.onmousedown },
 	                    _react2.default.createElement(
 	                        'tbody',
 	                        null,
 	                        _react2.default.createElement(
 	                            'tr',
 	                            null,
-	                            tds1
+	                            TDs[0],
+	                            TDs[1],
+	                            TDs[2]
 	                        ),
 	                        _react2.default.createElement(
 	                            'tr',
 	                            null,
-	                            tds2
+	                            TDs[3],
+	                            TDs[4],
+	                            TDs[5]
 	                        ),
 	                        _react2.default.createElement(
 	                            'tr',
 	                            null,
-	                            tds3
+	                            TDs[6],
+	                            TDs[7],
+	                            TDs[8]
 	                        )
 	                    )
 	                )
@@ -23269,7 +23269,7 @@
 /* 205 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -23296,28 +23296,30 @@
 	    function TD(props) {
 	        _classCallCheck(this, TD);
 
-	        return _possibleConstructorReturn(this, (TD.__proto__ || Object.getPrototypeOf(TD)).call(this, props));
+	        var _this = _possibleConstructorReturn(this, (TD.__proto__ || Object.getPrototypeOf(TD)).call(this, props));
+
+	        _this.onTdClick = _this.onTdClick.bind(_this);
+	        return _this;
 	    }
 
 	    _createClass(TD, [{
-	        key: 'render',
+	        key: "onTdClick",
+	        value: function onTdClick() {
+	            this.props.onTdClick(this.props.dataKey, this.props.item);
+	        }
+	    }, {
+	        key: "render",
 	        value: function render() {
-	            var data = void 0;
-	            switch (+this.props.item) {
-	                case -1:
-	                    data = 'X';
-	                    break;
-	                case 0:
-	                    data = '';
-	                    break;
-	                case 1:
-	                    data = 'O';
-	                    break;
-	            }
+	            var values = {
+	                "1": "O",
+	                "-1": "X",
+	                "0": ""
+	            };
+
 	            return _react2.default.createElement(
-	                'td',
-	                { 'data-key': this.props.dataKey },
-	                data
+	                "td",
+	                { onClick: this.onTdClick },
+	                values[this.props.item]
 	            );
 	        }
 	    }]);

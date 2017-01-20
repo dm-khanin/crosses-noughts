@@ -8,15 +8,16 @@ export default class Main extends React.Component {
         this.state = {
             activePlayer: null,
             isDataLoaded: false,
-            whoWins: null
+            whoWins: null,
+            arr: [],
+            initialArr: []
         };
 
         this.onSetCrossesIsActive = this.onSetCrossesIsActive.bind(this);
         this.onSetNoughtsIsActive = this.onSetNoughtsIsActive.bind(this);
-        this.onTableClick = this.onTableClick.bind(this);
         this.dataLoaded = this.dataLoaded.bind(this);
-        this.array = [];
         this.isWin = this.isWin.bind(this);
+        this.onTdClick = this.onTdClick.bind(this);
     }
 
     onSetCrossesIsActive() {
@@ -31,41 +32,29 @@ export default class Main extends React.Component {
         });
     }
 
-    onTableClick(e) {
-        if (this.state.activePlayer === null || e.target.textContent != '' || this.state.whoWins !== null) {
+    onTdClick(key, value) {
+        if (this.state.activePlayer === null || value !== 0 || this.state.whoWins !== null) {
             return;
         }
 
-        const nodeElement = e.target;
-        const key = nodeElement.dataset.key;
+        let prevArray = this.state.arr;
+        this.state.activePlayer === "crosses" ? prevArray[key] = -1 : prevArray[key] = 1;
+        this.setState({
+            arr: prevArray
+        });
 
-        switch(this.state.activePlayer) {
-            case "crosses": {
-                nodeElement.textContent = 'X';
-                this.array[key] = -1;
-                if (this.isWin(this.array)) {
-                    return;
-                }
-                this.onSetNoughtsIsActive();
-                break;
-            }
-
-            case "noughts": {
-                nodeElement.textContent = 'O';
-                this.array[key] = 1;
-                if (this.isWin(this.array)) {
-                    return;
-                }
-                this.onSetCrossesIsActive();
-                break;
-            }
+        if (this.isWin(this.state.arr)) {
+            return;
         }
+
+        prevArray[key] === -1 ? this.onSetNoughtsIsActive() : this.onSetCrossesIsActive();
     }
 
     dataLoaded(data) {
-        this.array = data;
         this.setState({
-            isDataLoaded: true
+            isDataLoaded: true,
+            initialArr: data,
+            arr: data.slice()
         });
     }
 
@@ -114,9 +103,11 @@ export default class Main extends React.Component {
                     win={this.state.whoWins}
                 />
                 <Table
-                    click={this.onTableClick}
+                    onTdClick={this.onTdClick}
                     dataLoaded={this.dataLoaded}
                     isDataLoaded={this.state.isDataLoaded}
+                    initialArr={this.state.initialArr}
+                    arr={this.state.arr}
                 />
             </div>
         )
